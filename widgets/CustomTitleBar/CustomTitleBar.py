@@ -91,7 +91,12 @@ class CustomTitleBar (QWidget):
             if _is_maximized:
                 self._parent.ui.central_widget_layout.setContentsMargins(0,0,0,0)
                 self.main_bg.setStyleSheet(f'background-color:{self._bg_color}; border-top-right-radius:0px; border-top-left-radius:0px')
-                self._parent.ui.main_page.setStyleSheet(f'background-color: #eeeeee; border-bottom-left-radius: 0px; border-bottom-right-radius: 0px;')
+                self._parent.ui.credits_bar.setStyleSheet(f'''
+                    background-color:#dddddd;
+                    padding: 0 15px 0 15px;
+                    border-bottom-left-radius: 0px;
+                    border-bottom-right-radius: 0px;
+                ''')
                 self.maximize_restore_button.set_icon(self._btn_restore_icon)
                 self.maximize_restore_button._tooltip.setText(self.title_bar_settings['tb_maximize_btn_restore_tooltip_text'])
                 self.maximize_restore_button._tooltip.adjustSize()
@@ -100,7 +105,12 @@ class CustomTitleBar (QWidget):
             else:
                 self._parent.ui.central_widget_layout.setContentsMargins(10,10,10,10)
                 self.main_bg.setStyleSheet(f'background-color:{self._bg_color}; border-top-right-radius:{self._radius}px; border-top-left-radius:{self._radius}px')
-                self._parent.ui.main_page.setStyleSheet(f'background-color: #eeeeee; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;')
+                self._parent.ui.credits_bar.setStyleSheet(f'''
+                    background-color:#dddddd;
+                    padding: 0 15px 0 15px;
+                    border-bottom-left-radius: {self.app_settings['app_corner_radius']}px;
+                    border-bottom-right-radius: {self.app_settings['app_corner_radius']}px;
+                ''')
                 self.maximize_restore_button.set_icon(get_icon_path(self.title_bar_settings['tb_maximize_btn_icon_path']))
                 self.maximize_restore_button._tooltip.setText(self.title_bar_settings['tb_maximize_btn_tooltip_text'])
                 self.maximize_restore_button._tooltip.adjustSize()

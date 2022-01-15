@@ -1,3 +1,12 @@
+# *************************************************************
+#
+#   BY: JAVIER C. DIAZ
+#   VERSION: 1.0.0
+#   DESCRIPTION: An application to get and compare information
+#                about cryptos from several exchanges
+#
+# *************************************************************
+
 import sys
 
 from utils.QtCore import *

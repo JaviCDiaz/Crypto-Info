@@ -32,8 +32,7 @@ class CustomPage (QWidget):
 
         self.setStyleSheet(f'''
             background-color: #eeeeee; 
-            border-bottom-left-radius: {self.settings['app_corner_radius']}px;
-            border-bottom-right-radius: {self.settings['app_corner_radius']}px;
+            border: none;
         ''')
 
         self.select_exchange.currentTextChanged.connect(self.update_exchange_coin_info)
