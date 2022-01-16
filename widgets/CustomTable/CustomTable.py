@@ -13,7 +13,8 @@ from widgets.CustomTableChart.CustomTableChart import CustomTableChart
 
 class CustomTable (QTableWidget):
     def __init__(
-        self
+        self,
+        parent
     ):
         super().__init__()
 
@@ -23,8 +24,12 @@ class CustomTable (QTableWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
 
+        self._parent = parent
+
         self.settings = Settings().table_settings
         self.coins_db_settings = Settings().coins_database_settings
+
+        self._data = None
 
         self._text_color = self.settings['table_text_color']
         
@@ -86,7 +91,7 @@ class CustomTable (QTableWidget):
             QTableWidget {{	
                 gridline-color: transparent;
                 color: {self._text_color};
-                padding: 20px 20px 20px 20px;
+                padding: 20px 20px 0px 20px;
             }}
             QTableWidget::item{{
                 border-color: none;
@@ -138,10 +143,10 @@ class CustomTable (QTableWidget):
         self.setRowCount(0)
         
         conn = sqlite3.connect(self.coins_db_settings['db_file_name'])
-        df_coins = pd.read_sql_query(f"SELECT * from {self.coins_db_settings['db_table_name']}", conn)
+        self._data = pd.read_sql_query(f"SELECT * from {self.coins_db_settings['db_table_name']}", conn)
 
-        if not df_coins.empty:
-            for index, row_info in df_coins.iterrows():
+        if not self._data.empty:
+            for index, row_info in self._data.iterrows():
                 row_number = index
 
                 column_0_item = QTableWidgetItem()
@@ -190,6 +195,39 @@ class CustomTable (QTableWidget):
                 self.setCellWidget(row_number, 5, self.column_5_chart)
                 self.setCellWidget(row_number, 6, self.column_6_btn)
                 self.setRowHeight(row_number, 60)
+
+        # TOP GAINER COIN
+        gainer_coin_name, gainer_price, gainer_data = self.get_gainer_coin()
+        self._parent.info_box_1.load_info_box_data(gainer_coin_name, gainer_price, gainer_data)
+
+        # TOP LOSSER COIN
+        losser_coin_name, losser_price, losser_data = self.get_losser_coin()
+        self._parent.info_box_2.load_info_box_data(losser_coin_name, losser_price, losser_data)
+
+        # TOP VOLUME COIN
+        top_volume_coin_name, top_volume_price, top_volume_data = self.get_top_volume_coin()
+        self._parent.info_box_3.load_info_box_data(top_volume_coin_name, top_volume_price, top_volume_data)
+
+
+    def get_gainer_coin (self):
+        coin_name = self._data['coin'][self._data['change_24h'].idxmax()]
+        price = round(self._data['price'][self._data['change_24h'].idxmax()], 3)
+        data = str(self._data['change_24h'][self._data['change_24h'].idxmax()]) + '%'
+        return coin_name, price, data
+
+
+    def get_losser_coin (self):
+        coin_name = self._data['coin'][self._data['change_24h'].idxmin()]
+        price = round(self._data['price'][self._data['change_24h'].idxmin()], 3)
+        data = str(self._data['change_24h'][self._data['change_24h'].idxmin()]) + '%'
+        return coin_name, price, data
+        
+
+    def get_top_volume_coin (self):
+        coin_name = self._data['coin'][self._data['quote_volume_24h'].idxmax()]
+        price = round(self._data['price'][self._data['quote_volume_24h'].idxmax()], 3)
+        data = '$ ' + str(round(self._data['quote_volume_24h'][self._data['quote_volume_24h'].idxmax()], 2))
+        return coin_name, price, data
 
 
 class CustomTableItemDelegate (QStyledItemDelegate):

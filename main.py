@@ -8,9 +8,11 @@
 # *************************************************************
 
 import sys
+import sqlite3
+import pandas as pd
 
 from utils.QtCore import *
-from utils.functions import add_coin_to_db, get_coin_info, update_coin_info
+from utils.functions import add_coin_to_db, get_coin_info, refresh_coin_info
 from utils.settings import Settings
 
 from ui_main import UI_MainWindow
@@ -27,7 +29,7 @@ class MainWindow (QMainWindow):
         self.coins_db_settings = Settings().coins_database_settings
 
         # UPDATE DATA WHEN OPEN THE APP, BEFORE LOADING GUI
-        #update_coin_info(self.coins_db_settings['db_file_name'], self.coins_db_settings['db_table_name'])
+        #refresh_coin_info(self.coins_db_settings['db_file_name'], self.coins_db_settings['db_table_name'])
 
         self.ui = UI_MainWindow()
         self.ui.setup_ui(self)

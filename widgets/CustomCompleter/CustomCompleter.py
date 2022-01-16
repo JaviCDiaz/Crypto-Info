@@ -85,8 +85,7 @@ class CompleterDelegate (QStyledItemDelegate):
 
         item_text = index.model().index(index.row(), index.column()).data()
 
-        icon_name = self.get_icon_name(item_text)
-        icon = QPixmap(get_coin_icon(icon_name, size=16))
+        icon = QPixmap(get_coin_icon(item_text, size=16))
 
         if option.state & QStyle.State_MouseOver:
             rect_text = QRect(option.rect.left() + 40 + icon.width(), option.rect.top(), option.rect.width() - 40 - icon.width(), option.rect.height())
@@ -115,14 +114,3 @@ class CompleterDelegate (QStyledItemDelegate):
             icon
         )        
         painter.end()
-
-    
-    def get_icon_name (self, item_text):
-        if item_text[-2:] == 'UP':
-            icon_name = item_text[:-2]
-        elif item_text[-4:] == 'DOWN':
-            icon_name = item_text[:-4]
-        else:
-            icon_name = item_text
-
-        return icon_name

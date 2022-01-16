@@ -19,7 +19,14 @@ def get_icon_path (icon_name, folder_name='icons'):
 
 # FUNCTION TO GET COIN ICONS
 def get_coin_icon (coin_name, size=16):
-    icon_coin_name = coin_name + '_' + str(size) + '.png'
+    if coin_name[-2:] == 'UP':
+        icon_name = coin_name[:-2]
+    elif coin_name[-4:] == 'DOWN':
+        icon_name = coin_name[:-4]
+    else:
+        icon_name = coin_name
+
+    icon_coin_name = icon_name + '_' + str(size) + '.png'
     icon_coin_path = get_icon_path(icon_coin_name, 'icons/coins_png')
     if os.path.isfile(icon_coin_path):
         return icon_coin_path
@@ -214,7 +221,7 @@ def add_coin_to_db (db_path, db_table_name, info):
 
 
 # FUNCTION TO UPDATE COIN INFO
-def update_coin_info (db_path, db_table_name):
+def refresh_coin_info (db_path, db_table_name):
     success = False
         
     try:
