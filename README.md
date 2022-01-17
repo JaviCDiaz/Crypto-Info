@@ -9,10 +9,11 @@
     <br />
     An application to get cryptos information from several exchanges
     <br />
-    <a href="https://github.com/JavierColmenares/Crypto-Info/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/JavierColmenares/Crypto-Info/issues">Request Feature</a>
   </p>
+</div>
+
+<div>
+  <h2>Screeshoots</h2>
 </div>
 
 ![app  screenshot](https://user-images.githubusercontent.com/59014683/149761856-7c1cae2f-3241-4dbb-b441-f534149d7524.png)
