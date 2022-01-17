@@ -13,6 +13,24 @@
 </div>
 
 <div>
+  <h2>Exchanges</h2>
+  <p>
+    <br />
+    This application uses data from the following exchanges:
+    <br />
+  </p>
+  <ul>
+    <li><a href="https://www.binance.com/">Binance</a></li>
+    <li><a href="https://www.kucoin.com/">KuCoin</a></li>
+    <li><a href="https://www.gate.io/">Gate IO</a></li>
+    <li><a href="https://www.kraken.com/">Kraken</a></li>
+    <li><a href="https://www.huobi.com/">Huobi</a></li>
+    <li><a href="https://www.coinbase.com/">Coinbase</a></li>
+    <li><a href="https://www.okex.com/">OKEx</a></li>
+  </ul>
+</div>
+
+<div>
   <h2>Screeshoots</h2>
 </div>
 
