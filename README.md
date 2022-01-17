@@ -3,7 +3,7 @@
 
 <div align="center">
   <a href="https://github.com/JavierColmenares/Crypto-Info">
-    <img src="https://user-images.githubusercontent.com/59014683/149761861-583e714d-e130-4e7c-b4c9-385121b5d8f3.png" alt="Logo" width="80" height="80">
+    <img src="https://user-images.githubusercontent.com/59014683/149762993-76aa8ff1-6f93-4723-b162-a14093e1c18d.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">Crypto - Info</h3>
