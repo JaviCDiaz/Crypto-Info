@@ -212,14 +212,14 @@ class CustomTable (QTableWidget):
     def get_gainer_coin (self):
         coin_name = self._data['coin'][self._data['change_24h'].idxmax()]
         price = round(self._data['price'][self._data['change_24h'].idxmax()], 3)
-        data = str(self._data['change_24h'][self._data['change_24h'].idxmax()]) + '%'
+        data = str(round(self._data['change_24h'][self._data['change_24h'].idxmax()], 3)) + '%'
         return coin_name, price, data
 
 
     def get_losser_coin (self):
         coin_name = self._data['coin'][self._data['change_24h'].idxmin()]
         price = round(self._data['price'][self._data['change_24h'].idxmin()], 3)
-        data = str(self._data['change_24h'][self._data['change_24h'].idxmin()]) + '%'
+        data = str(round(self._data['change_24h'][self._data['change_24h'].idxmin()], 3)) + '%'
         return coin_name, price, data
         
 

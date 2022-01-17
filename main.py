@@ -7,18 +7,151 @@
 #
 # *************************************************************
 
+
+# WINDOWS TASKBAR ICON
+import ctypes
+myappid = 'Crypto Info'
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
 import sys
 import sqlite3
 import pandas as pd
 
 from utils.QtCore import *
-from utils.functions import add_coin_to_db, get_coin_info, refresh_coin_info
+from utils.functions import get_icon_path, add_coin_to_db, get_coin_info
 from utils.settings import Settings
 
 from ui_main import UI_MainWindow
 from widgets.CustomComboBox.CustomComboBox import CustomComboBox
 from widgets.CustomGrips.CustomGrips import CustomGrip
 from widgets.CustomLineEdit.CustomLineEdit import CustomLineEdit
+
+
+class Splashcreen (QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.app_settings = Settings().app_settings
+        self.coins_db_settings = Settings().coins_database_settings
+
+        self.setWindowTitle(self.app_settings['window_title'])
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.resize(700, 400)
+        
+        self.app_icon = QIcon()
+        self.app_icon.addFile(get_icon_path(self.app_settings['app_logo']))
+        self.setWindowIcon(self.app_icon)
+
+        self._splashscreen_logo = get_icon_path('splashscreen_logo.png')
+
+        self.setup_ui()
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.load_app)
+        self.timer.start(40)
+
+        self.show()
+
+
+    def load_app(self):
+
+        conn = sqlite3.connect(self.coins_db_settings['db_file_name'])
+        df_coins = pd.read_sql_query(f"SELECT * from {self.coins_db_settings['db_table_name']}", conn)
+
+        coin_updated_info = {}
+        for idx, row_info in df_coins.iterrows():
+            coin_info = get_coin_info(row_info['exchange'], row_info['coin'])
+            coin_updated_info = {
+                    'coin': row_info['coin'],
+                    'exchange': row_info['exchange'],
+                    'price': coin_info['price'],
+                    'volume_24h': coin_info['volume_24h'],
+                    'quote_volume_24h': coin_info['quote_volume_24h'],
+                    'change_24h': coin_info['change_24h'],
+                    'chart_24h': coin_info['chart_24h']
+                }
+
+            conn.cursor().execute(f'''
+                UPDATE {self.coins_db_settings['db_table_name']}
+                SET
+                    price = {coin_updated_info['price']},
+                    volume_24h = {coin_updated_info['volume_24h']},
+                    quote_volume_24h = {coin_updated_info['quote_volume_24h']},
+                    change_24h = {coin_updated_info['change_24h']},
+                    chart_24h = "{coin_updated_info['chart_24h']}"
+                WHERE
+                    coin = "{coin_updated_info['coin']}" AND exchange = "{coin_updated_info['exchange']}"
+            ''')
+                            
+            conn.commit()
+            self.progress_bar.setValue(round(((idx + 1) / len(df_coins)) * 100))
+
+        if conn:
+            conn.close()
+
+        self.timer.stop()
+
+        self.body = MainWindow()
+        self.body.show()
+
+        self.close()
+        
+    
+    def setup_ui(self):
+        # CENTRAL WIDGET AND LAYOUT
+        self.central_widget = QWidget()
+        self.central_widget_layout = QVBoxLayout(self.central_widget)
+        self.central_widget_layout.setContentsMargins(0,0,0,0)
+
+        # MAIN FRAME
+        self.main_frame = QFrame()
+        self.main_frame.setStyleSheet('background-color: #202020; border-radius: 10px;')
+        self.main_layout = QVBoxLayout(self.main_frame)
+        self.main_layout.setContentsMargins(10,50,10,50)
+
+        # LOGO
+        self.logo = QLabel()
+        self.logo.setMinimumSize(100,100)
+        self.logo.setMaximumSize(100,100)
+        self.logo.setStyleSheet(f'image: url("{self._splashscreen_logo}")')
+
+        # TITLE
+        self.title = QLabel()
+        self.title.setMinimumHeight(40)
+        self.title.setMaximumHeight(40)
+        self.title.setText('Crypto-Info')
+        self.title.setStyleSheet('color: #d2d2d2; font: 600 14pt "Segoe UI"')
+
+        # PROGRESS BAR
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMinimumSize(500, 30)
+        self.progress_bar.setMaximumSize(500, 30)
+        self.progress_bar.setStyleSheet(f'''
+            QProgressBar{{
+                background-color:#505050;
+                border-style:none;
+                border-radius:10px;
+                color: #242424;
+                text-align:center;
+            }}
+            
+            QProgressBar::Chunk{{
+                background-color: #ffc50c;
+                border-radius:10px;
+            }}
+        ''')
+        self.progress_bar.setProperty("value", 0)
+        self.progress_bar.setObjectName("progressBar")
+
+        # ADD WIDGETS TO LAYOUTS
+        self.main_layout.addWidget(self.logo, alignment=Qt.AlignCenter)
+        self.main_layout.addWidget(self.title, alignment=Qt.AlignCenter)
+        self.main_layout.addWidget(self.progress_bar, alignment=Qt.AlignCenter)
+
+        self.central_widget_layout.addWidget(self.main_frame)
+
+        self.setCentralWidget(self.central_widget)
 
 
 class MainWindow (QMainWindow):
@@ -28,15 +161,14 @@ class MainWindow (QMainWindow):
         self.app_settings = Settings().app_settings
         self.coins_db_settings = Settings().coins_database_settings
 
-        # UPDATE DATA WHEN OPEN THE APP, BEFORE LOADING GUI
-        #refresh_coin_info(self.coins_db_settings['db_file_name'], self.coins_db_settings['db_table_name'])
+        self.app_icon = QIcon()
+        self.app_icon.addFile(get_icon_path(self.app_settings['app_logo']))
+        self.setWindowIcon(self.app_icon)
 
         self.ui = UI_MainWindow()
         self.ui.setup_ui(self)
 
         self.app_config()
-
-        self.show()
 
     
     def setup_btns (self):
@@ -125,6 +257,6 @@ class MainWindow (QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    app_window = MainWindow()
+    app_window = Splashcreen()
 
     sys.exit(app.exec())
