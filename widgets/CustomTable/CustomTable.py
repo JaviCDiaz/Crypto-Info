@@ -165,19 +165,19 @@ class CustomTable (QTableWidget):
                 column_4_item.setText(str(round(row_info['change_24h'], 3)) + '%')
 
                 column_5_chart_data = QSplineSeries()
-                chart_24h_info = json.loads(row_info['chart_24h'])
-                for idx, close_price in enumerate(chart_24h_info):
+                chart_7d_info = json.loads(row_info['chart_7d'])
+                for idx, close_price in enumerate(chart_7d_info):
                     column_5_chart_data.append(idx, close_price)
 
-                if chart_24h_info[-1] >= chart_24h_info[0]:
+                if chart_7d_info[-1] >= chart_7d_info[0]:
                     line_color = self._positive_chart_change
                 else:
                     line_color = self._negative_chart_change
 
                 self.column_5_chart = CustomTableChart(
                     data=column_5_chart_data,
-                    max_value=max(chart_24h_info) * 1.01,
-                    min_value=min(chart_24h_info) * 0.99,
+                    max_value=max(chart_7d_info) * 1.01,
+                    min_value=min(chart_7d_info) * 0.99,
                     line_color=line_color
                 )
 

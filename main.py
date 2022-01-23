@@ -65,7 +65,7 @@ class Splashcreen (QMainWindow):
                 [volume_24h] FLOAT,
                 [quote_volume_24h] FLOAT,
                 [change_24h] FLOAT,
-                [chart_24h] TEXT,
+                [chart_7d] TEXT,
                 UNIQUE (coin, exchange)
             )
         ''')
@@ -82,7 +82,7 @@ class Splashcreen (QMainWindow):
                         'volume_24h': coin_info['volume_24h'],
                         'quote_volume_24h': coin_info['quote_volume_24h'],
                         'change_24h': coin_info['change_24h'],
-                        'chart_24h': coin_info['chart_24h']
+                        'chart_7d': coin_info['chart_7d']
                     }
 
                 conn.cursor().execute(f'''
@@ -92,7 +92,7 @@ class Splashcreen (QMainWindow):
                         volume_24h = {coin_updated_info['volume_24h']},
                         quote_volume_24h = {coin_updated_info['quote_volume_24h']},
                         change_24h = {coin_updated_info['change_24h']},
-                        chart_24h = "{coin_updated_info['chart_24h']}"
+                        chart_7d = "{coin_updated_info['chart_7d']}"
                     WHERE
                         coin = "{coin_updated_info['coin']}" AND exchange = "{coin_updated_info['exchange']}"
                 ''')
@@ -229,7 +229,7 @@ class MainWindow (QMainWindow):
                     'volume_24h': coin_info['volume_24h'],
                     'quote_volume_24h': coin_info['quote_volume_24h'],
                     'change_24h': coin_info['change_24h'],
-                    'chart_24h': coin_info['chart_24h']
+                    'chart_7d': coin_info['chart_7d']
                 }
                 if add_coin_to_db(self.coins_db_settings['db_file_name'], self.coins_db_settings['db_table_name'], info):
                     self.ui.main_page.table_coins.load_table_data()
