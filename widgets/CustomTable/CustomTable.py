@@ -196,17 +196,17 @@ class CustomTable (QTableWidget):
                 self.setCellWidget(row_number, 6, self.column_6_btn)
                 self.setRowHeight(row_number, 60)
 
-        # TOP GAINER COIN
-        gainer_coin_name, gainer_price, gainer_data = self.get_gainer_coin()
-        self._parent.info_box_1.load_info_box_data(gainer_coin_name, gainer_price, gainer_data)
+            # TOP GAINER COIN
+            gainer_coin_name, gainer_price, gainer_data = self.get_gainer_coin()
+            self._parent.info_box_1.load_info_box_data(gainer_coin_name, gainer_price, gainer_data)
 
-        # TOP LOSSER COIN
-        losser_coin_name, losser_price, losser_data = self.get_losser_coin()
-        self._parent.info_box_2.load_info_box_data(losser_coin_name, losser_price, losser_data)
+            # TOP LOSSER COIN
+            losser_coin_name, losser_price, losser_data = self.get_losser_coin()
+            self._parent.info_box_2.load_info_box_data(losser_coin_name, losser_price, losser_data)
 
-        # TOP VOLUME COIN
-        top_volume_coin_name, top_volume_price, top_volume_data = self.get_top_volume_coin()
-        self._parent.info_box_3.load_info_box_data(top_volume_coin_name, top_volume_price, top_volume_data)
+            # TOP VOLUME COIN
+            top_volume_coin_name, top_volume_price, top_volume_data = self.get_top_volume_coin()
+            self._parent.info_box_3.load_info_box_data(top_volume_coin_name, top_volume_price, top_volume_data)
 
 
     def get_gainer_coin (self):

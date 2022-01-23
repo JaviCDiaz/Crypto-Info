@@ -13,11 +13,11 @@ class CustomInfoBox (QFrame):
         self.setMaximumWidth(250)
 
         self._title = title
-        self._coin_name = ''
+        self._coin_name = '--'
         self._coin_icon = get_coin_icon(self._coin_name, size=32)
         self._price = '$' + str(0.000)
         self._is_percentage = is_percentage
-        self._data_info = ''
+        self._data_info = '--'
 
         self.setup_ui()
 
@@ -88,7 +88,7 @@ class CustomInfoBoxCoinData (QFrame):
     def __init__(
         self,
         is_percentage = False,
-        data = ''
+        data = '--'
     ):
         super().__init__()
 
@@ -98,6 +98,7 @@ class CustomInfoBoxCoinData (QFrame):
         self._positive_color = '#03a66d'
         self._neutral_color = '#252525'
         self._negative_color = '#cf304a'
+        self._no_data_color = '#777777'
 
 
     def load_data (self, data):
@@ -110,27 +111,32 @@ class CustomInfoBoxCoinData (QFrame):
         painter.begin(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        if self._is_percentage:
+        if self._data == '--':
             rect_text = QRect(40, 0, self.rect().width(), self.rect().height())
             rect_icon = self.rect()
-            if float(self._data[:-1]) > 0:
-                icon = QPixmap(get_icon_path('icon_info_box_up.png'))
-                color = self._positive_color
-                self.icon_paint(painter, icon, rect_icon, color)
-                pen_text = QPen(QColor(color))
-            elif float(self._data[:-1]) == 0:
-                icon = QPixmap(get_icon_path('icon_dash.png'))
-                color = self._neutral_color
-                self.icon_paint(painter, icon, rect_icon, color)
-                pen_text = QPen(QColor(color))
-            else:
-                icon = QPixmap(get_icon_path('icon_info_box_down.png'))
-                color = self._negative_color
-                self.icon_paint(painter, icon, rect_icon, color)
-                pen_text = QPen(QColor(color))
+            pen_text = QPen(QColor(self._no_data_color))
         else:
-            rect_text = QRect(10, 0, self.rect().width(), self.rect().height())
-            pen_text = QPen(QColor(self._neutral_color))
+            if self._is_percentage:
+                rect_text = QRect(40, 0, self.rect().width(), self.rect().height())
+                rect_icon = self.rect()
+                if float(self._data[:-1]) > 0:
+                    icon = QPixmap(get_icon_path('icon_info_box_up.png'))
+                    color = self._positive_color
+                    self.icon_paint(painter, icon, rect_icon, color)
+                    pen_text = QPen(QColor(color))
+                elif float(self._data[:-1]) == 0:
+                    icon = QPixmap(get_icon_path('icon_dash.png'))
+                    color = self._neutral_color
+                    self.icon_paint(painter, icon, rect_icon, color)
+                    pen_text = QPen(QColor(color))
+                else:
+                    icon = QPixmap(get_icon_path('icon_info_box_down.png'))
+                    color = self._negative_color
+                    self.icon_paint(painter, icon, rect_icon, color)
+                    pen_text = QPen(QColor(color))
+            else:
+                rect_text = QRect(10, 0, self.rect().width(), self.rect().height())
+                pen_text = QPen(QColor(self._neutral_color))
             
         painter.setFont(QFont("Segoe UI", 14, 600))
         painter.setPen(pen_text)

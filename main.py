@@ -57,35 +57,51 @@ class Splashcreen (QMainWindow):
     def load_app(self):
 
         conn = sqlite3.connect(self.coins_db_settings['db_file_name'])
+        conn.cursor().execute(f'''
+            CREATE TABLE IF NOT EXISTS {self.coins_db_settings['db_table_name']}(
+                [coin] TEXT,
+                [exchange] TEXT,
+                [price] FLOAT,
+                [volume_24h] FLOAT,
+                [quote_volume_24h] FLOAT,
+                [change_24h] FLOAT,
+                [chart_24h] TEXT,
+                UNIQUE (coin, exchange)
+            )
+        ''')
         df_coins = pd.read_sql_query(f"SELECT * from {self.coins_db_settings['db_table_name']}", conn)
+        
+        if not df_coins.empty:
+            coin_updated_info = {}
+            for idx, row_info in df_coins.iterrows():
+                coin_info = get_coin_info(row_info['exchange'], row_info['coin'])
+                coin_updated_info = {
+                        'coin': row_info['coin'],
+                        'exchange': row_info['exchange'],
+                        'price': coin_info['price'],
+                        'volume_24h': coin_info['volume_24h'],
+                        'quote_volume_24h': coin_info['quote_volume_24h'],
+                        'change_24h': coin_info['change_24h'],
+                        'chart_24h': coin_info['chart_24h']
+                    }
 
-        coin_updated_info = {}
-        for idx, row_info in df_coins.iterrows():
-            coin_info = get_coin_info(row_info['exchange'], row_info['coin'])
-            coin_updated_info = {
-                    'coin': row_info['coin'],
-                    'exchange': row_info['exchange'],
-                    'price': coin_info['price'],
-                    'volume_24h': coin_info['volume_24h'],
-                    'quote_volume_24h': coin_info['quote_volume_24h'],
-                    'change_24h': coin_info['change_24h'],
-                    'chart_24h': coin_info['chart_24h']
-                }
-
-            conn.cursor().execute(f'''
-                UPDATE {self.coins_db_settings['db_table_name']}
-                SET
-                    price = {coin_updated_info['price']},
-                    volume_24h = {coin_updated_info['volume_24h']},
-                    quote_volume_24h = {coin_updated_info['quote_volume_24h']},
-                    change_24h = {coin_updated_info['change_24h']},
-                    chart_24h = "{coin_updated_info['chart_24h']}"
-                WHERE
-                    coin = "{coin_updated_info['coin']}" AND exchange = "{coin_updated_info['exchange']}"
-            ''')
-                            
-            conn.commit()
-            self.progress_bar.setValue(round(((idx + 1) / len(df_coins)) * 100))
+                conn.cursor().execute(f'''
+                    UPDATE {self.coins_db_settings['db_table_name']}
+                    SET
+                        price = {coin_updated_info['price']},
+                        volume_24h = {coin_updated_info['volume_24h']},
+                        quote_volume_24h = {coin_updated_info['quote_volume_24h']},
+                        change_24h = {coin_updated_info['change_24h']},
+                        chart_24h = "{coin_updated_info['chart_24h']}"
+                    WHERE
+                        coin = "{coin_updated_info['coin']}" AND exchange = "{coin_updated_info['exchange']}"
+                ''')
+                                
+                conn.commit()
+                self.progress_bar.setValue(round(((idx + 1) / len(df_coins)) * 100))
+        
+        else:
+            self.progress_bar.setValue(100)
 
         if conn:
             conn.close()
