@@ -1,5 +1,4 @@
 from utils.QtCore import *
-from utils.functions import get_coin_icon, get_coin_list, get_icon_path
 from utils.settings import Settings
 
 from widgets.CustomAddCoinBtn.CustomAddCoinBtn import CustomAddCoinBtn
@@ -16,10 +15,14 @@ class CustomPage (QWidget):
     clicked = Signal()
     released = Signal()
 
-    def __init__(self):
+    def __init__(
+        self,
+        parent
+    ):
         super().__init__()
 
         self.settings = Settings().app_settings
+        self._parent = parent
 
         self._exchange_list = self.settings['exchange_list']
         self._exchange_coins_list = []
@@ -27,9 +30,7 @@ class CustomPage (QWidget):
         self.setup_ui()
 
         # INITIALIZE COIN LIST, COMPLETER MODEL AND LABEL INFO
-        self._exchange_coins_list = get_coin_list(self.select_exchange.currentText())
-        self.search_coin_completer.model().setStringList(self._exchange_coins_list)
-        self.label_coins_number.update_info(self.select_exchange.currentText(), len(self._exchange_coins_list))
+        self.update_exchange_coin_info()
 
         self.setStyleSheet(f'''
             background-color: #eeeeee; 
@@ -56,8 +57,7 @@ class CustomPage (QWidget):
     
     def update_exchange_coin_info (self):
         # UPDATE COIN LIST, COMPLETER MODEL AND LABEL INFO
-        self.label_coins_number.update_info(loading=True)
-        self._exchange_coins_list = get_coin_list(self.select_exchange.currentText())
+        self._exchange_coins_list = next((coin_list['coin_list'] for coin_list in self._parent.all_coin_lists if coin_list['exchange'] == self.select_exchange.currentText()), None)
         self.search_coin_completer.model().setStringList(self._exchange_coins_list)
         self.label_coins_number.update_info(self.select_exchange.currentText(), len(self._exchange_coins_list))
 

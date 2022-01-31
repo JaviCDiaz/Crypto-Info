@@ -11,7 +11,6 @@ class CustomCoinsNumberLabel (QLabel):
         self._coins_number = 0
         self._text_prefix = 'Number of coins listed:   '
         self._exchange = 'binance'
-        self._loading = False
 
         self.setStyleSheet('''
             color: #404040;
@@ -20,16 +19,11 @@ class CustomCoinsNumberLabel (QLabel):
         ''')
 
 
-    def update_info (self, exchange=None, coins_number=None, loading=False):
+    def update_info (self, exchange=None, coins_number=None):
         self._exchange = exchange
         self._coins_number = coins_number
-        self._loading = loading
-        if loading:
-            self.setText('Loading...')
-            self.repaint()
-        else:
-            self.setText(self._text_prefix + str(self._coins_number))
-            self.repaint()
+        self.setText(self._text_prefix + str(self._coins_number))
+        self.repaint()
 
 
     def paintEvent(self, arg__1: QPaintEvent) -> None:
@@ -39,10 +33,9 @@ class CustomCoinsNumberLabel (QLabel):
         p.begin(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         
-        if not self._loading:
-            icon = QPixmap(get_exchange_icon(self._exchange, size=16))
-            rect = QRect(10, 0, icon.width(), self.height())
-            self.icon_paint(p, icon, rect)
+        icon = QPixmap(get_exchange_icon(self._exchange, size=16))
+        rect = QRect(10, 0, icon.width(), self.height())
+        self.icon_paint(p, icon, rect)
 
         p.end()
 

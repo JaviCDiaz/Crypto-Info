@@ -69,7 +69,7 @@ class UI_MainWindow (object):
         self.credits_layout.addWidget(self.credits_version, alignment=Qt.AlignRight)
 
         # PAGE
-        self.main_page = CustomPage()
+        self.main_page = CustomPage(parent)
         
         # ADD WIDGETS TO LAYOUTS
         self.main_layout.addWidget(self.title_bar_frame)

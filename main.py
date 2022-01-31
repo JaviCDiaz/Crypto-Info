@@ -18,7 +18,8 @@ import sqlite3
 import pandas as pd
 
 from utils.QtCore import *
-from utils.functions import get_icon_path, add_coin_to_db, get_coin_info
+from utils.db_functions import db_create_table, db_update_table, add_coin_to_db
+from utils.functions import format_coin_info, get_all_coin_lists, get_icon_path, get_coins_info, get_coins_info_urls
 from utils.settings import Settings
 
 from ui_main import UI_MainWindow
@@ -57,58 +58,35 @@ class Splashcreen (QMainWindow):
     def load_app(self):
 
         conn = sqlite3.connect(self.coins_db_settings['db_file_name'])
-        conn.cursor().execute(f'''
-            CREATE TABLE IF NOT EXISTS {self.coins_db_settings['db_table_name']}(
-                [coin] TEXT,
-                [exchange] TEXT,
-                [price] FLOAT,
-                [volume_24h] FLOAT,
-                [quote_volume_24h] FLOAT,
-                [change_24h] FLOAT,
-                [chart_7d] TEXT,
-                UNIQUE (coin, exchange)
-            )
-        ''')
-        df_coins = pd.read_sql_query(f"SELECT * from {self.coins_db_settings['db_table_name']}", conn)
-        
-        if not df_coins.empty:
-            coin_updated_info = {}
-            for idx, row_info in df_coins.iterrows():
-                coin_info = get_coin_info(row_info['exchange'], row_info['coin'])
-                coin_updated_info = {
-                        'coin': row_info['coin'],
-                        'exchange': row_info['exchange'],
-                        'price': coin_info['price'],
-                        'volume_24h': coin_info['volume_24h'],
-                        'quote_volume_24h': coin_info['quote_volume_24h'],
-                        'change_24h': coin_info['change_24h'],
-                        'chart_7d': coin_info['chart_7d']
-                    }
+        db_create_table(conn, self.coins_db_settings['db_table_name'])
 
-                conn.cursor().execute(f'''
-                    UPDATE {self.coins_db_settings['db_table_name']}
-                    SET
-                        price = {coin_updated_info['price']},
-                        volume_24h = {coin_updated_info['volume_24h']},
-                        quote_volume_24h = {coin_updated_info['quote_volume_24h']},
-                        change_24h = {coin_updated_info['change_24h']},
-                        chart_7d = "{coin_updated_info['chart_7d']}"
-                    WHERE
-                        coin = "{coin_updated_info['coin']}" AND exchange = "{coin_updated_info['exchange']}"
-                ''')
-                                
+        # LOADING COIN INFO FROM DATABASE
+        df_coins = pd.read_sql_query(f"SELECT coin, exchange from {self.coins_db_settings['db_table_name']}", conn).to_dict('records')
+        if df_coins:
+            urls = get_coins_info_urls(df_coins)
+            coin_info_request_results = get_coins_info(urls)
+
+            for idx in range(len(coin_info_request_results[0])):
+                coin_updated_info = format_coin_info(coin_info_request_results[0][idx], coin_info_request_results[1][idx], coin_info_request_results[2][2*idx], coin_info_request_results[2][2*idx + 1])
+                db_update_table(conn, self.coins_db_settings['db_table_name'], coin_updated_info)
                 conn.commit()
-                self.progress_bar.setValue(round(((idx + 1) / len(df_coins)) * 100))
+            
+            self.progress_bar.setValue(50)
         
         else:
-            self.progress_bar.setValue(100)
+            self.progress_bar.setValue(50)
+        
+        # LOADING COIN LISTS FROM ALL EXCHANGES
+        all_coin_lists = get_all_coin_lists()
+        self.progress_bar.setValue(100)
 
+        # CLOSE CONNECTION AND FINISH SPLASHSCREEN
         if conn:
             conn.close()
 
         self.timer.stop()
 
-        self.body = MainWindow()
+        self.body = MainWindow(all_coin_lists)
         self.body.show()
 
         self.close()
@@ -147,23 +125,31 @@ class Splashcreen (QMainWindow):
             QProgressBar{{
                 background-color:#505050;
                 border-style:none;
-                border-radius:10px;
+                border-radius:15px;
                 color: #242424;
                 text-align:center;
             }}
             
             QProgressBar::Chunk{{
                 background-color: #ffc50c;
-                border-radius:10px;
+                border-radius:15px;
             }}
         ''')
         self.progress_bar.setProperty("value", 0)
         self.progress_bar.setObjectName("progressBar")
 
+        # INFO TEXT
+        self.info_text = QLabel()
+        self.info_text.setMinimumHeight(30)
+        self.info_text.setMaximumHeight(30)
+        self.info_text.setText('Loading...')
+        self.info_text.setStyleSheet('font: 500 10pt "Segoe UI"; color: #d2d2d2')
+
         # ADD WIDGETS TO LAYOUTS
         self.main_layout.addWidget(self.logo, alignment=Qt.AlignCenter)
         self.main_layout.addWidget(self.title, alignment=Qt.AlignCenter)
         self.main_layout.addWidget(self.progress_bar, alignment=Qt.AlignCenter)
+        self.main_layout.addWidget(self.info_text, alignment=Qt.AlignCenter)
 
         self.central_widget_layout.addWidget(self.main_frame)
 
@@ -171,11 +157,15 @@ class Splashcreen (QMainWindow):
 
 
 class MainWindow (QMainWindow):
-    def __init__(self):
+    def __init__(
+        self,
+        all_coin_lists = []
+    ):
         super().__init__()
 
         self.app_settings = Settings().app_settings
         self.coins_db_settings = Settings().coins_database_settings
+        self.all_coin_lists = all_coin_lists
 
         self.app_icon = QIcon()
         self.app_icon.addFile(get_icon_path(self.app_settings['app_logo']))
@@ -220,21 +210,19 @@ class MainWindow (QMainWindow):
             coin = self.ui.main_page.search_coin.text()
             coin_list = self.ui.main_page.get_coins_list()
 
+            coin_info = [{'coin': coin, 'exchange': exchange}]
+
             if coin in coin_list:
-                coin_info = get_coin_info(exchange, coin)
-                info = {
-                    'coin': coin,
-                    'exchange': exchange,
-                    'price': coin_info['price'],
-                    'volume_24h': coin_info['volume_24h'],
-                    'quote_volume_24h': coin_info['quote_volume_24h'],
-                    'change_24h': coin_info['change_24h'],
-                    'chart_7d': coin_info['chart_7d']
-                }
-                if add_coin_to_db(self.coins_db_settings['db_file_name'], self.coins_db_settings['db_table_name'], info):
+                urls = get_coins_info_urls(coin_info)
+                request_results = get_coins_info(urls)
+
+                new_coin_info = format_coin_info(request_results[0][0], request_results[1][0], request_results[2][0], request_results[2][1])
+
+                if add_coin_to_db(self.coins_db_settings['db_file_name'], self.coins_db_settings['db_table_name'], new_coin_info):
                     self.ui.main_page.table_coins.load_table_data()
                 else:
                     print('coin can not added correctly')
+
             else:
                 print('Select a valid coin.')
 
