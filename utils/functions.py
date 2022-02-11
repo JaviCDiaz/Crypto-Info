@@ -89,36 +89,36 @@ def format_coin_lists (coin_lists_request_results):
                     coin_list.append(coin['symbol'][:-4])
 
         elif exchange == 'KuCoin':
-            for coin in requests.get('https://api.kucoin.com/api/v1/market/allTickers').json()['data']['ticker']:
+            for coin in coin_lists_request_results[1][idx]['data']['ticker']:
                 coin_ticker = coin['symbol'].split('-')[0]
                 if coin_ticker not in coin_list:
                     coin_list.append(coin['symbol'].split('-')[0])
 
         elif exchange == 'GateIO':
-            for coin in requests.get('https://api.gateio.ws/api/v4/spot/currency_pairs').json():
+            for coin in coin_lists_request_results[1][idx]:
                 coin_ticker = coin['base']
                 if coin['base'] not in coin_list:
                     coin_list.append(coin_ticker)
 
         elif exchange == 'Kraken':
-            for coin in requests.get('https://api.kraken.com/0/public/Assets').json()['result']:
+            for coin in coin_lists_request_results[1][idx]['result']:
                 if coin not in coin_list:
                     coin_list.append(coin)
 
         elif exchange == 'Huobi':
-            for coin in requests.get('https://api.huobi.pro/v1/common/symbols').json()['data']:
+            for coin in coin_lists_request_results[1][idx]['data']:
                 coin_ticker = coin['base-currency'].upper()
                 if coin_ticker not in coin_list:
                     coin_list.append(coin_ticker)
 
         elif exchange == 'Coinbase':
-            for coin in requests.get('https://api.exchange.coinbase.com/products').json():
+            for coin in coin_lists_request_results[1][idx]:
                 coin_ticker = coin['base_currency']
                 if coin_ticker not in coin_list:
                     coin_list.append(coin_ticker)
 
         elif exchange == 'OKEx':
-            for coin in requests.get('https://www.okex.com/api/v5/market/tickers?instType=SPOT').json()['data']:
+            for coin in coin_lists_request_results[1][idx]['data']:
                 coin_ticker = coin['instId'].split('-')[0]
                 if coin_ticker not in coin_list:
                     coin_list.append(coin_ticker)
