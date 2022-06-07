@@ -7,7 +7,7 @@
 
   <p align="center">
     <br />
-    An application to get cryptos information from several exchanges
+    An application to get cryptos information from different exchanges
     <br />
   </p>
   <p align="center">
